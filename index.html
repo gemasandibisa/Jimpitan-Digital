@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>m-Jimpitan Digital</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <button id="theme-toggle">
+        <i class='bx bx-sun' id="theme-icon"></i>
+    </button>
+
+    <div id="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <i class='bx bxs-bank'></i>
+            </div>
+            <h1 class="splash-title">m-<span>Jimpitan</span></h1>
+            <p class="splash-subtitle">Gemasandi</p>
+        </div>
+        <div class="splash-footer">
+            <div class="splash-loader"></div>
+            <p>By KARANG TARUNA GEMASANDI</p>
+            <p style="font-size: 0.65rem; opacity: 0.5; margin-top: 4px;">v2.2.0 • Secure Encryption Secured</p>
+        </div>
+    </div>
+
+    <div id="ui-logger" class="hidden"></div>
+
+    <section id="login-screen" class="screen active">
+        <div class="login-header">
+            <div class="login-logo">
+                <i class='bx bxs-bank'></i>
+            </div>
+            <h2>m-<span>Jimpitan</span></h2>
+            <p class="subtitle">Akses Mobile Banking Jimpitan</p>
+            
+            <div class="pin-indicators">
+                <div class="pin-dot" id="dot-1"></div>
+                <div class="pin-dot" id="dot-2"></div>
+                <div class="pin-dot" id="dot-3"></div>
+                <div class="pin-dot" id="dot-4"></div>
+            </div>
+        </div>
+
+        <div class="keypad-container">
+            <div class="keypad">
+                <button class="key-btn" data-num="1">1</button>
+                <button class="key-btn" data-num="2">2</button>
+                <button class="key-btn" data-num="3">3</button>
+                <button class="key-btn" data-num="4">4</button>
+                <button class="key-btn" data-num="5">5</button>
+                <button class="key-btn" data-num="6">6</button>
+                <button class="key-btn" data-num="7">7</button>
+                <button class="key-btn" data-num="8">8</button>
+                <button class="key-btn" data-num="9">9</button>
+                <button class="key-btn key-action" id="btn-clear">CLEAR</button>
+                <button class="key-btn" data-num="0">0</button>
+                <button class="key-btn key-del" id="btn-del"><i class='bx bx-backspace'></i></button>
+            </div>
+        </div>
+    </section>
+
+    <section id="main-screen" class="screen hidden">
+        <header class="app-header">
+            <div>
+                <h3>Selamat Datang, <span id="user-name">Petugas</span></h3>
+                <p class="subtitle">m-Jimpitan Dashboard System</p>
+            </div>
+            <button id="btn-logout" class="icon-btn"><i class='bx bx-power-off'></i></button>
+        </header>
+
+        <main id="view-container">
+            <div id="view-home" class="view active">
+                <div class="balance-card">
+                    <div class="server-status-container">
+                        <div id="srv-led" class="led-indicator led-online"></div>
+                        <span id="srv-text" class="led-status-text text-online">Online</span>
+                    </div>
+
+                    <p>Total Pendapatan Hari Ini</p>
+                    <div class="balance-amount">
+                        <h1 id="total-amount">Rp 0</h1>
+                        <button id="toggle-eye" class="icon-btn" style="color: rgba(255,255,255,0.8);"><i class='bx bx-hide'></i></button>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <button class="action-btn nav-trigger" data-target="view-input">
+                        <div class="icon-circle" style="background: rgba(0, 230, 118, 0.15); color: var(--primary-color);">
+                            <i class='bx bx-transfer-alt'></i>
+                        </div>
+                        Input Jimpitan
+                    </button>
+                    <button class="action-btn nav-trigger" data-target="view-status">
+                        <div class="icon-circle" style="background: rgba(42, 82, 152, 0.25); color: #4fc3f7;">
+                            <i class='bx bx-qr-scan'></i>
+                        </div>
+                        Cek Jimpitan
+                    </button>
+                </div>
+                
+                <div class="recent-transactions">
+                    <h3>Transaksi Terbaru</h3>
+                    <ul id="transaction-list"></ul>
+                </div>
+            </div>
+
+            <!-- VIEW INPUT / SETORAN -->
+            <div id="view-input" class="view hidden">
+                <div class="form-card">
+                    <h3>Input Jimpitan Warga</h3>
+                    <p class="subtitle" style="margin-bottom: 15px;">Scan atau pilih nama langsung dari daftar, bila ada warga baru hubungi akun SUPER ADMIN</p>
+
+                    <button id="btn-toggle-scan-input" class="btn-scan"><i class='bx bx-camera'></i> Scan QR Nama Warga</button>
+                    <div id="scanner-wrapper-input" class="scanner-container hidden">
+                        <div id="reader-input"></div>
+                    </div>
+
+                    <!-- FITUR PILIHAN TANGGAL SETORAN -->
+                    <div class="input-wrapper" style="margin-bottom: 12px; text-align: left;">
+                        <label for="input-tanggal-setoran" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">
+                            <i class='bx bx-calendar'></i> Tanggal Setoran
+                        </label>
+                        <input type="date" id="input-tanggal-setoran" class="input-field" style="margin-bottom: 0;">
+                    </div>
+
+                    <!-- SEARCHABLE DROPDOWN (METODE 2) -->
+<div class="searchable-select-container" id="custom-warga-container">
+    <label for="input-search-warga" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">
+        <i class='bx bx-user-pin'></i> Pilih / Ketik Nama Warga
+    </label>
+
+    <div class="searchable-input-wrapper">
+        <i class='bx bx-search search-icon-left'></i>
+        <input type="text" id="input-search-warga" class="input-field searchable-input" placeholder="Ketik nama atau pilih warga..." autocomplete="off">
+        <i class='bx bx-chevron-down search-icon-right' id="icon-warga-arrow"></i>
+    </div>
+
+    <!-- Hidden Input untuk menyimpan ID/Nilai Warga yang dipilih (Tetap pakai ID select-warga agar script lama tidak error) -->
+    <input type="hidden" id="select-warga" value="">
+
+    <!-- Pop-up List Rekomendasi Warga -->
+    <ul id="warga-dropdown-list" class="searchable-dropdown-list hidden">
+        <!-- Item daftar warga di-render otomatis via JavaScript -->
+    </ul>
+</div>
+                    
+                    <input type="text" id="input-nominal" class="input-field" value="" placeholder="Nominal Rupiah (Rp)">
+                    
+                    <button id="btn-submit-jimpitan" class="btn-primary" style="margin-top: 10px;"><i class='bx bx-save'></i> Simpan Data</button>
+                </div>
+            </div>
+
+            <div id="view-status" class="view hidden">
+                <div class="form-card">
+                    <h3>Cek Status Jimpitan Warga</h3>
+                    <p class="subtitle" style="margin-bottom: 15px;">Scan QR kartu atau ketik nama warga secara manual</p>
+                    
+                    <button id="btn-toggle-scan-cek" class="btn-scan"><i class='bx bx-camera'></i> Scan Nama Warga</button>
+                    <div id="scanner-wrapper-cek" class="scanner-container hidden">
+                        <div id="reader-cek"></div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <input type="text" id="search-warga" class="input-field" placeholder="Hasil scan / ketik nama manual..." style="margin: 0;">
+                        <button id="btn-search-warga" class="btn-primary" style="width: auto; padding: 0 22px;"><i class='bx bx-search-alt' style="font-size: 1.3rem; vertical-align: middle;"></i> Cari Data</button>
+                    </div>
+                    
+                    <div id="status-result" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <div id="view-riwayat" class="view hidden">
+                <div class="form-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <h3>Riwayat Semua Transaksi</h3>
+                        <button id="btn-refresh-riwayat" class="icon-btn" style="color: var(--primary-color);"><i class='bx bx-refresh' style="font-size: 1.8rem;"></i></button>
+                    </div>
+                    <p class="subtitle" style="margin-bottom: 15px;">Menampilkan semua Transaksi</p>
+                    
+                    <div id="admin-global-balance" class="hidden" style="margin-bottom: 20px; padding: 16px; background: rgba(0, 230, 118, 0.1); border: 1px solid rgba(0, 230, 118, 0.3); border-radius: 12px;">
+                        <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 4px;">Total Akumulasi Saldo Seluruh Warga</p>
+                        <h2 id="global-balance-amount" style="color: var(--primary-color); font-weight: 700; font-size: 1.5rem;">Rp 0</h2>
+                    </div>
+                    
+                    <input type="text" id="filter-riwayat-nama" class="input-field" placeholder="Ketik nama warga untuk memfilter..." style="margin-bottom: 15px;">
+                    
+                    <ul id="global-history-list" class="global-history-list"></ul>
+                </div>
+            </div>
+
+            <div id="view-admin" class="view hidden">
+                <div class="form-card" style="border-left: 4px solid var(--banking-blue); padding-bottom: 10px;">
+                    <h3>Control Panel Admin</h3>
+                    <p class="subtitle" style="margin-bottom: 20px;">Hak Akses Terverifikasi: <b>SUPER ADMIN</b></p>
+                    
+                    <div class="accordion-item" style="margin-bottom: 12px; border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.02);">
+                        <div class="accordion-header" id="header-cek-saldo" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: pointer; background: rgba(0,0,0,0.15); transition: background 0.2s;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class='bx bx-calendar' style="font-size: 1.3rem; color: var(--gold-accent);"></i>
+                                <span style="font-size: 0.9rem; font-weight: 600;">Cek Saldo Masuk per Tanggal</span>
+                            </div>
+                            <i class='bx bx-chevron-down accordion-arrow' id="arrow-cek-saldo" style="font-size: 1.2rem; color: var(--text-muted); transition: transform 0.3s;"></i>
+                        </div>
+                        <div id="card-cek-saldo-tanggal" class="hidden" style="padding: 16px; background: rgba(0,0,0,0.1); border-top: 1px solid var(--glass-border);">
+                            <div class="date-filter-group">
+                                <div class="date-input-wrapper">
+                                    <label>Awal</label>
+                                    <input type="date" id="filter-tgl-awal" class="input-date">
+                                </div>
+                                <div class="date-input-wrapper">
+                                    <label>Akhir</label>
+                                    <input type="date" id="filter-tgl-akhir" class="input-date">
+                                </div>
+                            </div>
+                            <div id="hasil-kalkulasi-saldo" style="margin: 12px 0; padding: 12px; background: rgba(255,215,0,0.06); border: 1px dashed rgba(255,215,0,0.2); border-radius: 8px; display: none;">
+                                <p style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px;">Total Terhitung:</p>
+                                <h3 id="txt-saldo-terfilter" style="color: var(--gold-accent); font-size: 1.3rem; font-weight: 700;">Rp 0</h3>
+                            </div>
+                            <button id="btn-hitung-saldo" class="btn-primary" style="padding: 12px; font-size: 0.85rem; background: var(--banking-gradient); color: white; margin-top: 8px;"><i class='bx bx-calculator'></i> Hitung Total</button>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item" style="margin-bottom: 12px; border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.02);">
+                        <div class="accordion-header" id="header-warga-baru" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: pointer; background: rgba(0,0,0,0.15); transition: background 0.2s;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class='bx bx-user-plus' style="font-size: 1.3rem; color: #00e676;"></i>
+                                <span style="font-size: 0.9rem; font-weight: 600;">Daftarkan Warga Baru</span>
+                            </div>
+                            <i class='bx bx-chevron-down accordion-arrow' id="arrow-warga-baru" style="font-size: 1.2rem; color: var(--text-muted); transition: transform 0.3s;"></i>
+                        </div>
+                        <div id="card-warga-baru" class="hidden" style="padding: 16px; background: rgba(0,0,0,0.1); border-top: 1px solid var(--glass-border);">
+                            <input type="text" id="input-nama-warga-baru" class="input-field" placeholder="Ketik Nama Lengkap Warga..." style="margin: 0 0 12px 0; padding: 12px;">
+                            <button id="btn-submit-warga-baru" class="btn-primary" style="padding: 12px; font-size: 0.85rem; background: linear-gradient(135deg, #00c853 0%, #009624 100%); color: white;"><i class='bx bx-user-plus'></i> Simpan Warga</button>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item" style="margin-bottom: 12px; border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.02);">
+                        <div class="accordion-header" id="header-manajemen-pin" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: pointer; background: rgba(0,0,0,0.15); transition: background 0.2s;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class='bx bx-key' style="font-size: 1.3rem; color: #4fc3f7;"></i>
+                                <span style="font-size: 0.9rem; font-weight: 600;">Pengaturan PIN Otentikasi</span>
+                            </div>
+                            <i class='bx bx-chevron-down accordion-arrow' id="arrow-manajemen-pin" style="font-size: 1.2rem; color: var(--text-muted); transition: transform 0.3s;"></i>
+                        </div>
+                        <div id="card-manajemen-pin" class="hidden" style="padding: 16px; background: rgba(0,0,0,0.1); border-top: 1px solid var(--glass-border);">
+                            <select id="select-petugas-pin" class="input-field" style="margin: 0 0 10px 0; padding: 12px;">
+                                <option value="">-- Petugas Baru (Ketik Manual) --</option>
+                            </select>
+                            <input type="text" id="input-nama-petugas" class="input-field" placeholder="Nama Petugas..." style="margin: 0 0 10px 0; padding: 12px;">
+                            <input type="password" id="input-pin-petugas" class="input-field" placeholder="PIN Baru (4 Digit)" maxlength="4" inputmode="numeric" style="margin: 0 0 12px 0; padding: 12px;">
+                            <button id="btn-submit-pin" class="btn-primary" style="padding: 12px; font-size: 0.85rem; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white;"><i class='bx bx-save'></i> Simpan PIN</button>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item" style="margin-bottom: 12px; border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.02);">
+                        <div class="accordion-header" id="btn-load-rekap" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: pointer; background: rgba(0,0,0,0.15); transition: background 0.2s;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class='bx bx-list-ul' style="font-size: 1.3rem; color: #e0e0e0;"></i>
+                                <span style="font-size: 0.9rem; font-weight: 600;">Lihat Status Semua Warga</span>
+                            </div>
+                            <i class='bx bx-chevron-down accordion-arrow' id="arrow-rekap" style="font-size: 1.2rem; color: var(--text-muted); transition: transform 0.3s;"></i>
+                        </div>
+                        <div id="container-rekap-data" class="hidden" style="padding: 12px; background: rgba(0,0,0,0.1); border-top: 1px solid var(--glass-border);">
+                            <div id="admin-data-list" style="max-height: 250px; overflow-y: auto; border-radius: 8px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item" style="margin-bottom: 12px; border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.02);">
+                        <div class="accordion-header" id="header-qr-generator" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: pointer; background: rgba(0,0,0,0.15); transition: background 0.2s;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class='bx bx-qr' style="font-size: 1.3rem; color: #4fc3f7;"></i>
+                                <span style="font-size: 0.9rem; font-weight: 600;">Pembuat QR Code Warga</span>
+                            </div>
+                            <i class='bx bx-chevron-down accordion-arrow' id="arrow-qr-generator" style="font-size: 1.2rem; color: var(--text-muted); transition: transform 0.3s;"></i>
+                        </div>
+                        <div id="card-qr-generator" class="hidden" style="padding: 16px; background: rgba(0,0,0,0.1); border-top: 1px solid var(--glass-border); text-align: center;">
+                            <p class="subtitle" style="margin-bottom: 12px; text-align: left;">Pilih nama warga dari daftar untuk di-generate langsung menjadi QR Code Kartu Jimpitan.</p>
+                            <select id="select-warga-qr" class="input-field" style="margin: 0 0 12px 0; padding: 12px;">
+                                <option value="">-- Pilih Nama Warga --</option>
+                            </select>
+                            <button id="btn-generate-qr" class="btn-primary" style="padding: 12px; font-size: 0.85rem; background: linear-gradient(135deg, #3a7bd5 0%, #3a6073 100%); color: white;"><i class='bx bx-qr'></i> Buat QR Code</button>
+                            
+                            <div id="qr-output-container" class="hidden" style="background: #ffffff; padding: 15px; border-radius: 12px; width: fit-content; margin: 15px auto 0; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                                <div id="qrcode-canvas"></div>
+                                <button id="btn-download-qr" class="btn-secondary" style="width: auto; padding: 8px 16px; font-size: 0.8rem; border-color: #0b1528; color: #0b1528;"><i class='bx bx-download'></i> Unduh File QR (.png)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-card" style="margin-top: -5px;">
+                    <p class="subtitle" style="margin-bottom: 12px; font-weight: 600; color: var(--text-main); font-size: 0.8rem;"><i class='bx bx-export' style="color: var(--gold-accent); margin-right: 4px;"></i> Unduh Semua Data Jimpitan</p>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <button id="btn-export-csv" class="btn-secondary" style="padding: 10px 5px; font-size: 0.75rem;"><i class='bx bx-file'></i> CSV</button>
+                        <button id="btn-export-excel" class="btn-secondary" style="padding: 10px 5px; font-size: 0.75rem; border-color: #00c853; color: #00c853;"><i class='bx bx-spreadsheet'></i> Excel</button>
+                        <button id="btn-export-pdf" class="btn-secondary" style="padding: 10px 5px; font-size: 0.75rem; border-color: #ff5252; color: #ff5252;"><i class='bx bx-file-pdf'></i> PDF</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <button class="nav-item active nav-trigger" data-target="view-home">
+                <i class='bx bx-home-alt-2'></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-item nav-trigger" data-target="view-input">
+                <i class='bx bx-transfer-alt'></i>
+                <span>Input</span>
+            </button>
+            <button class="nav-item nav-trigger" data-target="view-status">
+                <i class='bx bx-file-find'></i>
+                <span>Cek Jimpitan</span>
+            </button>
+            <button class="nav-item nav-trigger" id="nav-riwayat-trigger" data-target="view-riwayat">
+                <i class='bx bx-receipt'></i>
+                <span>Riwayat</span>
+            </button>
+            <button class="nav-item nav-trigger hidden" id="nav-admin" data-target="view-admin">
+                <i class='bx bx-slider-alt'></i>
+                <span>Admin</span>
+            </button>
+        </nav>
+    </section>
+
+    <div id="custom-alert-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 10, 20, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10005; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: var(--panel-bg); border: 1px solid var(--glass-border); border-radius: 20px; width: 100%; max-width: 360px; padding: 24px; text-align: center; box-shadow: 0 20px 45px rgba(0,0,0,0.5); transform: scale(0.9); transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);" id="custom-alert-box">
+            <div id="alert-icon-container" style="font-size: 3.2rem; margin-bottom: 12px; display: flex; justify-content: center;"></div>
+            <h3 id="alert-title" style="margin: 0 0 8px 0; color: var(--text-main); font-size: 1.15rem; font-weight: 600; letter-spacing: 0.3px;"></h3>
+            <p id="alert-message" style="margin: 0 0 20px 0; color: var(--text-muted); font-size: 0.88rem; line-height: 1.5;"></p>
+            
+            <div id="alert-input-container" style="display: none; margin-bottom: 20px;">
+                <input type="text" id="alert-custom-input" style="width: 100%; padding: 14px; background: #0b1528; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-size: 1.1rem; text-align: center; font-weight: 700; outline: none; transition: border 0.3s;">
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button id="alert-btn-cancel" style="display: none; flex: 1; padding: 13px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #fff; border-radius: 12px; font-weight: 600; font-size: 0.88rem; cursor: pointer;">Batal</button>
+                <button id="alert-btn-confirm" style="flex: 1; padding: 13px; background: var(--primary-color); border: none; color: #070d1a; border-radius: 12px; font-weight: 700; font-size: 0.88rem; cursor: pointer;">Oke</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
