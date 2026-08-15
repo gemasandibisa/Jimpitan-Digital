@@ -1183,12 +1183,15 @@ const initUI = () => {
         e.target.value = e.target.value.replace(/\D/g, "");
     });
 
-    // Default Date Picker (Hari Ini)
+    // Default Date Picker
     const hariIni = new Date().toISOString().split('T')[0];
     const tglAwal = document.getElementById('filter-tgl-awal');
     const tglAkhir = document.getElementById('filter-tgl-akhir');
+    const inputTglSetoran = document.getElementById('input-tanggal-setoran');
+
     if (tglAwal) tglAwal.value = hariIni;
     if (tglAkhir) tglAkhir.value = hariIni;
+    if (inputTglSetoran) inputTglSetoran.value = hariIni; // Default input tanggal setoran = hari ini
 
     // PIN Keypad Buttons
     document.querySelectorAll('.key-btn[data-num]').forEach(btn => {
@@ -1206,6 +1209,7 @@ const initUI = () => {
     document.getElementById('btn-submit-jimpitan')?.addEventListener('click', async () => {
         const wargaId = document.getElementById('select-warga').value;
         const rawNominal = document.getElementById('input-nominal').value;
+        const inputTanggalVal = document.getElementById('input-tanggal-setoran')?.value;
         const nominalClean = rawNominal.replace(/\D/g, "");
 
         if (!wargaId || !nominalClean) return logToScreen('Lengkapi parameter data setoran!', true);
@@ -1217,8 +1221,24 @@ const initUI = () => {
                 btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Menyimpan Data...";
             }
 
+            // Susun Objek Mutasi Baru
+            const payloadMutasi = {
+                warga_id: parseInt(wargaId, 10),
+                nominal: parseInt(nominalClean, 10),
+                petugas_nama: currentUser.nama
+            };
+
+            // Jika ada tanggal setoran khusus yang dipilih, gabungkan dengan Jam:Menit:Detik saat ini
+            if (inputTanggalVal) {
+                const now = new Date();
+                const jam = String(now.getHours()).padStart(2, '0');
+                const menit = String(now.getMinutes()).padStart(2, '0');
+                const detik = String(now.getSeconds()).padStart(2, '0');
+                payloadMutasi.tanggal = `${inputTanggalVal}T${jam}:${menit}:${detik}`;
+            }
+
             const { error } = await withTimeout(
-                supabase.from('mutasi').insert([{ warga_id: parseInt(wargaId, 10), nominal: parseInt(nominalClean, 10), petugas_nama: currentUser.nama }])
+                supabase.from('mutasi').insert([payloadMutasi])
             );
             if (error) throw error;
 
@@ -1229,6 +1249,7 @@ const initUI = () => {
             const searchInput = document.getElementById('input-search-warga');
             if (searchInput) searchInput.value = '';
             document.getElementById('input-nominal').value = '';
+            if (inputTglSetoran) inputTglSetoran.value = hariIni; // Kembalikan ke tanggal hari ini
 
             await loadDashboardData(); 
             switchView('view-home');
